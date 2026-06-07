@@ -1,0 +1,8 @@
+# Built React bundle (Vite output) — generated, exclude from language stats
+public/admin/** linguist-generated=true
+# Lockfiles — generated
+*-lock.json linguist-generated=true
+# Project docs — exclude from language stats
+*.md linguist-documentation=true
+# Tooling config — vendored
+web/vite.config.js linguist-vendored=true
