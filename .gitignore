@@ -1,0 +1,28 @@
+# ── Secrets — NEVER commit ──
+.env
+.env.local
+*.pem
+
+# ── Python ──
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# ── Node deps (the BUILT app in public/admin IS committed for Render) ──
+node_modules/
+web/node_modules/
+npm-debug.log*
+
+# ── Runtime data (ephemeral; recreated at runtime) ──
+leads.json
+campaigns.json
+
+# ── Misc ──
+.DS_Store
+**/.DS_Store
+*.log
+.idea/
+.vscode/
