@@ -26,7 +26,7 @@ def _parse_model_json(text):
 
 
 async def _anthropic_reply(sys, history):
-    async with httpx.AsyncClient(timeout=15.0) as client:
+    async with httpx.AsyncClient(timeout=10.0) as client:
         r = await client.post(
             "https://api.anthropic.com/v1/messages",
             json={
@@ -49,7 +49,7 @@ async def _anthropic_reply(sys, history):
 
 async def _openai_reply(sys, history):
     base = (config.llm.base_url or "https://api.openai.com/v1").rstrip("/")
-    async with httpx.AsyncClient(timeout=15.0) as client:
+    async with httpx.AsyncClient(timeout=10.0) as client:
         r = await client.post(
             f"{base}/chat/completions",
             json={

@@ -18,7 +18,7 @@ from .config import config
 from .sarvam_client import text_to_speech as sarvam_tts, speech_to_text as sarvam_stt, sarvam_ready
 from .bhashini_client import text_to_speech as bhashini_tts, bhashini_ready
 from .audio import wav_base64_to_buffer
-from .conversation.manager import start_session, greet, handle_turn, end_session
+from .conversation.manager import start_session, greet, handle_turn, end_session, get_session
 
 router = APIRouter(prefix="/voice")
 
@@ -238,6 +238,24 @@ async def transcribe_recording(recording_url: str) -> str:
     return ""
 
 
+# Bounded greeting: never let the opening webhook hang past Twilio's ~15s limit.
+async def safe_greeting(session_id, direction, name=""):
+    try:
+        return await asyncio.wait_for(greet(session_id), timeout=8.0)
+    except Exception as e:
+        print("[greet] fallback:", type(e).__name__)
+        if direction == "outbound":
+            tail = (f"શું હું {name} સાથે વાત કરી રહ્યો છું?" if name
+                    else "શું હું જાણી શકું કે હું કોની સાથે વાત કરી રહ્યો છું?")
+            text = f"નમસ્તે! હું RK University ની admission સહાયક બોલું છું. {tail}"
+        else:
+            text = "નમસ્તે, RK University માં કોલ કરવા બદલ આભાર. હું આજે તમારી શું મદદ કરી શકું?"
+        s = get_session(session_id)
+        if s is not None:
+            s["history"].append({"role": "assistant", "content": text})
+        return text
+
+
 # ── Call entry points ────────────────────────────────────────
 @router.post("/inbound")
 async def inbound(request: Request):
@@ -245,7 +263,7 @@ async def inbound(request: Request):
     session_id = form.get("CallSid") or f"inbound-{int(time.time()*1000)}"
     vr = VoiceResponse()
     start_session(session_id, direction="inbound", phone=form.get("From", "") or "")
-    await speak(vr, await greet(session_id))
+    await speak(vr, await safe_greeting(session_id, "inbound"))
     listen(vr, session_id)
     return _xml(vr)
 
@@ -257,7 +275,7 @@ async def outbound(request: Request):
     student_name = request.query_params.get("name", "")
     vr = VoiceResponse()
     start_session(session_id, direction="outbound", student_name=student_name, phone=form.get("To", "") or "")
-    await speak(vr, await greet(session_id))
+    await speak(vr, await safe_greeting(session_id, "outbound", student_name))
     listen(vr, session_id)
     return _xml(vr)
 
