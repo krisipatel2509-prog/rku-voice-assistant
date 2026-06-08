@@ -50,8 +50,9 @@ class _Admin:
 
 class config:
     port = int(os.environ.get("PORT", "8000"))
-    # On Render, RENDER_EXTERNAL_URL is injected automatically (no ngrok needed).
-    public_url = (os.environ.get("PUBLIC_URL") or os.environ.get("RENDER_EXTERNAL_URL") or "").rstrip("/")
+    # Prefer Render's own injected URL so a leftover ngrok PUBLIC_URL can't make
+    # <Play>/audio clips point at the wrong host. Locally, PUBLIC_URL (ngrok) is used.
+    public_url = (os.environ.get("RENDER_EXTERNAL_URL") or os.environ.get("PUBLIC_URL") or "").rstrip("/")
     stt_engine = (os.environ.get("STT_ENGINE", "twilio") or "twilio").lower()
     default_language = os.environ.get("DEFAULT_LANGUAGE", "gu")
     twilio = _Twilio
