@@ -1,7 +1,7 @@
 """Offline rule-based Gujarati counselor (ported from src/llm/mock.js)."""
 import re
 
-from ..data.courses import courses, facts, find_course
+from ..data.courses import courses, find_course
 
 GUJARAT_CITIES = [
     "રાજકોટ", "અમદાવાદ", "સુરત", "વડોદરા", "ભાવનગર", "જામનગર", "જૂનાગઢ",
@@ -84,11 +84,13 @@ def _extract_lead(text, lead):
 
 def _answer_query(text, known_course):
     t = (text or "").lower()
+    course = find_course(t) or known_course
 
     if re.search(r"scholarship|શિષ્યવૃત્તિ|સ્કોલરશિપ|mysy", t, re.I):
-        return SCHOLARSHIP_GU
+        return course["scholarship_information"] if course else SCHOLARSHIP_GU
     if re.search(r"hostel|હોસ્ટેલ|રહેવા", t, re.I):
-        return "હા, છોકરા અને છોકરીઓ માટે અલગ હોસ્ટેલ, મેસ, Wi-Fi અને ૨૪ કલાક સુરક્ષા કેમ્પસમાં ઉપલબ્ધ છે."
+        base = "હા, છોકરા અને છોકરીઓ માટે અલગ હોસ્ટેલ, મેસ, Wi-Fi અને ૨૪ કલાક સુરક્ષા કેમ્પસમાં ઉપલબ્ધ છે."
+        return base + (f" હોસ્ટેલ ફી {course['hostel_fees']}." if course else "")
     if re.search(r"document|ડોક્યુમેન્ટ|દસ્તાવેજ|કાગળ", t, re.I):
         return ("૧૦મા અને ૧૨માની માર્કશીટ, school leaving certificate, આધાર કાર્ડ, ફોટા અને "
                 "category certificate (જો લાગુ પડે તો) જોઈશે.")
@@ -98,9 +100,9 @@ def _answer_query(text, known_course):
     if re.search(r"campus|કેમ્પસ|ક્યાં|location|address|સરનામ", t, re.I):
         return "અમારું કેમ્પસ રાજકોટ-ભાવનગર હાઇવે, કસ્તુરબાધામ, Rajkot ખાતે ૨૮૦ એકરમાં ફેલાયેલું છે."
 
-    course = find_course(t) or known_course
     if course and re.search(r"fee|fees|ફી|ખર્ચ", t, re.I):
-        return f"{course['name']} ની indicative fee {course['fees_indicative']} છે. ચોક્કસ આંકડો admission ટીમ confirm કરી આપશે."
+        return (f"{course['name']} ની ફી — વાર્ષિક {course['annual_fees']}, કુલ આશરે "
+                f"{course['total_fees']}. ચોક્કસ આંકડો admission ટીમ confirm કરી આપશે.")
     if course and re.search(r"placement|પ્લેસમેન્ટ|નોકરી|job", t, re.I):
         return f"{course['name']} માટે: {course['placement']}"
     if course and re.search(r"eligib|યોગ્યતા|qualification|માટે શું|criteria", t, re.I):
