@@ -16,7 +16,6 @@ QUESTIONS = {
     "student_name": "પહેલા, હું તમારું નામ જાણી શકું?",
     "course_interest": "તમને કયા course માં રસ છે?",
     "qualification": "તમારો છેલ્લો અભ્યાસ — qualification શું છે?",
-    "mobile_number": "છેલ્લે, follow-up માટે તમારો મોબાઇલ નંબર આપી શકશો?",
 }
 
 CLOSING = ("RK University માં રસ દાખવવા બદલ આભાર. કોઈ પણ વધારાની મદદ જોઈએ તો જરૂર સંપર્ક કરજો. "
@@ -162,15 +161,13 @@ def mock_reply(history, ctx=None):
             parts.append(f"શું તમે {label}course વિશે વધુ જાણવા માંગો છો — fees, placement કે બીજું કંઈ?")
         elif re.search(r"ના|નથી|નહીં|નહિ|\bno\b|બસ|આગળ", last_user, re.I) and not answer:
             lead_updates["course_qna"] = "done"
-            parts.append(QUESTIONS["mobile_number"])
+            parts.append("તમારી વિગતો નોંધાઈ ગઈ છે. આપણી admission ટીમ ટૂંક સમયમાં તમારો સંપર્ક કરશે. બીજું કંઈ પૂછવું છે?")
         elif answer:
             parts.append("બીજું કંઈ આ course વિશે પૂછવું છે? ના હોય તો આગળ વધીએ.")
         else:
             parts.append("ચોક્કસ, પૂછો — fees, placement, scholarship, hostel… જે જાણવું હોય.")
-    elif not merged.get("mobile_number"):
-        parts.append(QUESTIONS["mobile_number"])
     else:
-        parts.append("તમારી બધી વિગતો નોંધી લીધી છે. આપણી admission ટીમ ટૂંક સમયમાં follow-up કરશે. બીજું કંઈ પૂછવું છે?")
+        parts.append("તમારી વિગતો નોંધાઈ ગઈ છે. આપણી admission ટીમ ટૂંક સમયમાં તમારો સંપર્ક કરશે. બીજું કંઈ પૂછવું છે?")
 
     reply = " ".join(parts)
     if not answer and not lead_updates.get("course_interest"):
